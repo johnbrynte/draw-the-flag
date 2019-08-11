@@ -86,11 +86,19 @@ function init() {
 function paint(x, y) {
     var key = currentColor;
     var color = colorKeyLookup[key];
+    var rgb;
+    if (color == "black") {
+        rgb = [0, 0, 0];
+    } else if (color == "white") {
+        rgb = [255, 255, 255];
+    } else {
+        rgb = colors[color];
+    }
     drawTable[x][y] = key;
     drawTableEl[x][y].style.background = tinycolor({
-        r: colors[color][0],
-        g: colors[color][1],
-        b: colors[color][2],
+        r: rgb[0],
+        g: rgb[1],
+        b: rgb[2],
     }).toHexString();
 }
 
@@ -129,25 +137,84 @@ function initDrawTable() {
         var button = document.createElement("input");
         button.setAttribute("type", "button");
         button.value = colorList[i];
-        button.onmousemove = (function(color) {
+        button.onclick = (function(color) {
             return function(evt) {
                 currentColor = color;
             };
         })(i);
         document.body.appendChild(button);
     }
+
+    var search = document.createElement("input");
+    search.setAttribute("id", "search");
+    search.setAttribute("type", "button");
+    search.value = "search";
+    search.onclick = (function(color) {
+        return function(evt) {
+            searchFlag(drawTable);
+        };
+    })(i);
+    document.body.appendChild(search);
+
+    var reset = document.createElement("input");
+    reset.setAttribute("id", "reset");
+    reset.setAttribute("type", "button");
+    reset.value = "reset";
+    reset.onclick = (function(color) {
+        return function(evt) {
+            resetDrawTable();
+        };
+    })(i);
+    document.body.appendChild(reset);
+
+    var flags = document.createElement("div");
+    flags.setAttribute("id", "flag-result");
+    document.body.appendChild(flags);
 }
 
 function resetDrawTable() {
+    for (var x = 0; x < drawTable.length; x++) {
+        for (var y = 0; y < drawTable[0].length; y++) {
+            drawTable[x][y] = colorKey["white"];
+            drawTableEl[x][y].style.background = "#ffffff";
+        }
+    }
 
+    var flags = document.getElementById("flag-result");
+    flags.innerHTML = "";
 }
 
 function searchFlag(inData) {
     var start = Date.now();
 
-    // for (var code in flagData) {
-    //     var flag
-    // }
+    var result = [];
+    for (var code in flagData) {
+        var m = flagData[code];
+        var v = 0;
+        for (var x = 0; x < m.length; x++) {
+            for (var y = 0; y < m[0].length; y++) {
+                if (inData[x][y] == m[x][y]) {
+                    v++;
+                }
+            }
+        }
+        result.push([code, v]);
+    }
+    result.sort(function(a, b) {
+        return b[1] - a[1];
+    });
+
+    var flags = document.getElementById("flag-result");
+    flags.innerHTML = "";
+    for (var i = 0; i < 10; i++) {
+        var p = document.createElement("p");
+        p.innerHTML = result[i][0] + ", " + result[i][1];
+        flags.appendChild(p);
+
+        var img = new Image();
+        img.src = "images/" + result[i][0] + "0001.GIF";
+        flags.appendChild(img);
+    }
 
     var stop = Date.now();
 

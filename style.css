@@ -13,6 +13,7 @@ canvas {
 }
 
 table {
+    margin-bottom: 20px;
     border-collapse: collapse;
 }
 
@@ -20,4 +21,9 @@ table td {
     width: 16px;
     height: 16px;
     border: 1px solid gray;
+}
+
+#search {
+    display: block;
+    margin-top: 20px;
 }
