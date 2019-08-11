@@ -1,0 +1,23 @@
+html, body {
+    min-height: 100vh;
+    margin: 0;
+}
+
+canvas {
+    width: 256px;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table td {
+    width: 16px;
+    height: 16px;
+    border: 1px solid gray;
+}
