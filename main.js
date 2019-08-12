@@ -133,6 +133,19 @@ function initDrawTable() {
         }
     }
 
+    table.ontouchmove = (function(x, y) {
+        return function(evt) {
+            evt.preventDefault();
+            var e = evt.touches[0];
+            var size = table.offsetWidth / w;
+            var x = Math.floor((e.pageX - table.offsetLeft) / size);
+            var y = Math.floor((e.pageY - table.offsetTop) / size);
+            if (x >= 0 && x < w && y >= 0 && y < h) {
+                paint(x, y);
+            }
+        };
+    })(x, y);
+
     for (var i = 0; i < colorList.length; i++) {
         var button = document.createElement("input");
         button.setAttribute("type", "button");

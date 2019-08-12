@@ -3,6 +3,12 @@ html, body {
     margin: 0;
 }
 
+body {
+    padding: 20px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
 canvas {
     width: 256px;
     image-rendering: -webkit-optimize-contrast;
@@ -15,12 +21,17 @@ canvas {
 table {
     margin-bottom: 20px;
     border-collapse: collapse;
+    width: 100%;
+    max-width: 500px;
 }
 
 table td {
-    width: 16px;
-    height: 16px;
     border: 1px solid gray;
+}
+table td:after {
+    content: '';
+    display: block;
+    margin-top: 100%;
 }
 
 #search {
