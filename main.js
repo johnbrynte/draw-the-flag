@@ -13,16 +13,37 @@ document.body.ondrag = function(evt) {
 }
 
 var flagData;
+var flagInfo;
+
+var loaded = 0;
 
 var r = new XMLHttpRequest();
-//r.open("GET", "flags.json");
 r.open("GET", "flag-matrix.json");
 r.onload = () => {
     flagData = JSON.parse(r.response);
 
-    init();
+    loaded++;
+    if (loaded >= 2) {
+        init();
+    }
 };
 r.send();
+
+var r2 = new XMLHttpRequest();
+r2.open("GET", "flags.json");
+r2.onload = () => {
+    flagInfo = {};
+    var data = JSON.parse(r2.response);
+    for (var i = 0; i < data.length; i++) {
+        flagInfo[data[i].code] = data[i];
+    }
+
+    loaded++;
+    if (loaded >= 2) {
+        init();
+    }
+};
+r2.send();
 
 function rgbToNum(r, g, b) {
     var c = b + (g << 8) + (r << 16);
@@ -72,7 +93,7 @@ var drawTableEl = [];
 var currentColor = colorKey["red"];
 
 function init() {
-    //printFlag(0);
+    // printFlag(0);
     // analyzeFlags(flagData).then(function(data) {
     //     console.log(data);
     // });
@@ -220,12 +241,14 @@ function searchFlag(inData) {
     var flags = document.getElementById("flag-result");
     flags.innerHTML = "";
     for (var i = 0; i < 10; i++) {
+        var data = flagInfo[result[i][0]];
+
         var p = document.createElement("p");
-        p.innerHTML = result[i][0] + ", " + result[i][1];
+        p.innerHTML = data.name + ", " + result[i][1] + " (" + result[i][0] + ")";
         flags.appendChild(p);
 
         var img = new Image();
-        img.src = "images/" + result[i][0] + "0001.GIF";
+        img.src = data.image;
         flags.appendChild(img);
     }
 
