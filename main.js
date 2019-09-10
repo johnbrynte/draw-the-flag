@@ -95,6 +95,7 @@ var currentColorString = getColorString(currentColor);
 
 var canvas;
 var ctx;
+var brushSize = 10;
 
 var resolution = {
     width: 160,
@@ -202,7 +203,7 @@ function initDrawCanvas() {
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(b.x, b.y);
         ctx.strokeStyle = currentColorString;
-        ctx.lineWidth = 10;
+        ctx.lineWidth = brushSize;
         ctx.lineCap = "round";
         ctx.stroke();
     }
@@ -332,9 +333,13 @@ function initDrawTable() {
     }
 
     for (var i = 0; i < colorList.length; i++) {
-        var button = document.createElement("input");
+        var button = document.createElement("button");
+        button.style.backgroundColor = getColorString(colorKey[colorList[i]]);
+        if (i == 0) {
+            button.style.color = "white";
+        }
         button.setAttribute("type", "button");
-        button.value = colorList[i];
+        button.innerHTML = colorList[i];
         button.onclick = (function(color) {
             return function(evt) {
                 currentColor = color;
@@ -349,9 +354,13 @@ function initDrawTable() {
     document.body.appendChild(fillText);
 
     for (var i = 0; i < colorList.length; i++) {
-        var button = document.createElement("input");
+        var button = document.createElement("button");
+        button.style.backgroundColor = getColorString(colorKey[colorList[i]]);
+        if (i == 0) {
+            button.style.color = "white";
+        }
         button.setAttribute("type", "button");
-        button.value = colorList[i];
+        button.innerHTML = colorList[i];
         button.onclick = (function(color) {
             return function(evt) {
                 fillColor(color);
@@ -360,27 +369,35 @@ function initDrawTable() {
         document.body.appendChild(button);
     }
 
-    var search = document.createElement("input");
-    search.setAttribute("id", "search");
-    search.setAttribute("type", "button");
-    search.value = "search";
-    search.onclick = (function(color) {
-        return function(evt) {
-            searchFlag(drawTable);
-        };
-    })(i);
-    document.body.appendChild(search);
+    var buttonControls = document.createElement("div");
+    buttonControls.className = "button-controls";
 
-    var reset = document.createElement("input");
+    var reset = document.createElement("button");
     reset.setAttribute("id", "reset");
     reset.setAttribute("type", "button");
-    reset.value = "reset";
-    reset.onclick = (function(color) {
-        return function(evt) {
-            resetDrawTable();
-        };
-    })(i);
-    document.body.appendChild(reset);
+    reset.innerHTML = "Reset";
+    reset.onclick = function() {
+        resetDrawTable();
+    };
+    buttonControls.appendChild(reset);
+
+    var size1 = document.createElement("button");
+    size1.setAttribute("type", "button");
+    size1.innerHTML = "Small brush";
+    size1.onclick = function() {
+        brushSize = 10;
+    };
+    buttonControls.appendChild(size1);
+
+    var size2 = document.createElement("button");
+    size2.setAttribute("type", "button");
+    size2.innerHTML = "Big brush";
+    size2.onclick = function() {
+        brushSize = 22;
+    };
+    buttonControls.appendChild(size2);
+
+    document.body.appendChild(buttonControls);
 
     var flags = document.createElement("div");
     flags.setAttribute("id", "flag-result");
@@ -442,13 +459,18 @@ function searchFlag(inData) {
     for (var i = 0; i < 10; i++) {
         var data = flagInfo[result[i][0]];
 
+        var flagEl = document.createElement("div");
+        flagEl.className = "flag-result__item";
+
         var p = document.createElement("p");
         p.innerHTML = data.name + ", " + result[i][1] + " (" + result[i][0] + ")";
-        flags.appendChild(p);
+        flagEl.appendChild(p);
 
         var img = new Image();
         img.src = data.image;
-        flags.appendChild(img);
+        flagEl.appendChild(img);
+
+        flags.appendChild(flagEl);
     }
 
     var stop = Date.now();

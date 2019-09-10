@@ -44,7 +44,24 @@ table td:after {
     margin-top: 100%;
 }
 
-#search {
-    display: block;
-    margin-top: 20px;
+p {
+    margin: 5px 0;
+}
+
+button {
+    padding: 0.6em 1em;
+    background-color: white;
+}
+
+.button-controls {
+    margin-top: 10px;
+}
+
+#flag-result {
+    margin-top: 10px;
+}
+
+.flag-result__item:first-child {
+    background: rgba(0, 0, 255, 0.08);
+    border: 1px solid #aaa;
 }
