@@ -167,6 +167,18 @@ function initDrawTable() {
         };
     })(x, y);
 
+    table.ontouchend = function() {
+        searchFlag(drawTable);
+    }
+
+    table.ontouchleave = function() {
+        searchFlag(drawTable);
+    }
+
+    table.onmouseup = function() {
+        searchFlag(drawTable);
+    }
+
     for (var i = 0; i < colorList.length; i++) {
         var button = document.createElement("input");
         button.setAttribute("type", "button");
@@ -174,6 +186,22 @@ function initDrawTable() {
         button.onclick = (function(color) {
             return function(evt) {
                 currentColor = color;
+            };
+        })(i);
+        document.body.appendChild(button);
+    }
+
+    var fillText = document.createElement("p");
+    fillText.innerHTML = "Fill:"
+    document.body.appendChild(fillText);
+
+    for (var i = 0; i < colorList.length; i++) {
+        var button = document.createElement("input");
+        button.setAttribute("type", "button");
+        button.value = colorList[i];
+        button.onclick = (function(color) {
+            return function(evt) {
+                fillColor(color);
             };
         })(i);
         document.body.appendChild(button);
@@ -216,6 +244,17 @@ function resetDrawTable() {
 
     var flags = document.getElementById("flag-result");
     flags.innerHTML = "";
+}
+
+function fillColor(color) {
+    currentColor = color;
+    for (var x = 0; x < drawTable.length; x++) {
+        for (var y = 0; y < drawTable[0].length; y++) {
+            paint(x, y);
+        }
+    }
+
+    searchFlag(drawTable);
 }
 
 function searchFlag(inData) {
