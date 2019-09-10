@@ -1,14 +1,14 @@
 var mouseDown = false;
-document.body.onmousedown = function() {
+document.onmousedown = function() {
     mouseDown = true;
 }
-document.body.onmouseup = function() {
+document.onmouseup = function() {
     mouseDown = false;
 }
-document.body.onmouseleave = function() {
+document.onmouseleave = function() {
     mouseDown = false;
 }
-document.body.ondrag = function(evt) {
+document.ondrag = function(evt) {
     evt.preventDefault();
 }
 
@@ -91,6 +91,17 @@ colorPaletteLookup[360] = "red";
 var drawTable = [];
 var drawTableEl = [];
 var currentColor = colorKey["red"];
+var currentColorString = getColorString(currentColor);
+
+var canvas;
+var ctx;
+
+var resolution = {
+    width: 160,
+    height: 110,
+    horizontal: 16,
+    vertical: 11,
+};
 
 function init() {
     // printFlag(0);
@@ -101,13 +112,18 @@ function init() {
     //     printFlag(i);
     // }
 
+    initDrawCanvas();
     initDrawTable();
 }
 
 function paint(x, y) {
-    var key = currentColor;
-    var color = colorKeyLookup[key];
+    drawTable[x][y] = currentColor;
+    drawTableEl[x][y].style.background = currentColorString;
+}
+
+function getColorString(key) {
     var rgb;
+    var color = colorKeyLookup[key];
     if (color == "black") {
         rgb = [0, 0, 0];
     } else if (color == "white") {
@@ -115,16 +131,152 @@ function paint(x, y) {
     } else {
         rgb = colors[color];
     }
-    drawTable[x][y] = key;
-    drawTableEl[x][y].style.background = tinycolor({
+    return tinycolor({
         r: rgb[0],
         g: rgb[1],
         b: rgb[2],
     }).toHexString();
 }
 
+function initDrawCanvas() {
+    canvas = document.getElementById("canvas");
+    canvas.width = resolution.width;
+    canvas.height = resolution.height;
+    ctx = canvas.getContext("2d");
+
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, resolution.width, resolution.height);
+
+    var prevPos = null;
+
+    canvas.onmousedown = function(evt) {
+        prevPos = convertToCanvasPos(evt.pageX, evt.pageY);
+    };
+
+    canvas.onmouseenter = function(evt) {
+        if (mouseDown) {
+            prevPos = convertToCanvasPos(evt.pageX, evt.pageY);
+        }
+    };
+
+    canvas.onmousemove = function(evt) {
+        if (mouseDown) {
+            var pos = convertToCanvasPos(evt.pageX, evt.pageY);
+
+            drawLine(prevPos, pos);
+
+            prevPos = pos;
+        }
+    };
+
+    canvas.onmouseup = function(evt) {
+        convertCanvasToTable();
+    };
+
+    canvas.ontouchstart = function(evt) {
+        var e = evt.touches[0];
+        prevPos = convertToCanvasPos(e.pageX, e.pageY);
+    };
+
+    canvas.ontouchenter = function() {
+        var e = evt.touches[0];
+        prevPos = convertToCanvasPos(e.pageX, e.pageY);
+    }
+
+    canvas.ontouchmove = function(evt) {
+        evt.preventDefault();
+        var e = evt.touches[0];
+        var pos = convertToCanvasPos(e.pageX, e.pageY);
+
+        drawLine(prevPos, pos);
+
+        prevPos = pos;
+    };
+
+    canvas.ontouchend = function() {
+        convertCanvasToTable();
+    }
+
+    function drawLine(a, b) {
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.strokeStyle = currentColorString;
+        ctx.lineWidth = 10;
+        ctx.lineCap = "round";
+        ctx.stroke();
+    }
+
+    function convertToCanvasPos(x, y) {
+        return {
+            x: resolution.width * (x - canvas.offsetLeft) / canvas.offsetWidth,
+            y: resolution.height * (y - canvas.offsetTop) / canvas.offsetHeight,
+        };
+    }
+}
+
+function convertCanvasToTable() {
+    var data = ctx.getImageData(0, 0, resolution.width, resolution.height);
+    var size = resolution.width / resolution.horizontal;
+    var t_color = new tinycolor();
+
+    for (var x = 0; x < resolution.horizontal; x++) {
+        for (var y = 0; y < resolution.vertical; y++) {
+            var r = 0, g = 0, b = 0, a = 0;
+            var c = 0;
+            for (var yy = 0; yy < size; yy++) {
+                for (var xx = 0; xx < size; xx++) {
+                    var i = 4 * ((y * size + yy) * resolution.width + x * size + xx);
+
+                    r += data.data[i];
+                    g += data.data[i + 1];
+                    b += data.data[i + 2];
+                    a += data.data[i + 3];
+
+                    t_color._r = data.data[i];
+                    t_color._g = data.data[i + 1];
+                    t_color._b = data.data[i + 2];
+                    var hsv = t_color.toHsv();
+                    var _color;
+                    if (hsv.s < 0.5 || hsv.v < 0.3) {
+                        if (hsv.v < 0.5) {
+                            _color = 0; // black
+                        } else {
+                            _color = 1; // white
+                        }
+                    } else {
+                        var hue, closest = Infinity;
+                        for (var h in colorPaletteLookup) {
+                            var dx = Math.abs(hsv.h - h);
+                            if (dx < closest) {
+                                closest = dx;
+                                hue = h;
+                            }
+                        }
+                        _color = colorList.indexOf(colorPaletteLookup[hue]);
+                    }
+
+                    c += _color;
+                }
+            }
+            r /= size * size;
+            g /= size * size;
+            b /= size * size;
+
+            c /= size * size;
+
+            var color = colorList[Math.round(c)];
+
+            drawTable[x][y] = colorKey[color];
+            drawTableEl[x][y].style.background = getColorString(colorKey[color]);
+        }
+    }
+
+    searchFlag(drawTable);
+}
+
 function initDrawTable() {
-    var w = 16, h = 11;
+    var w = resolution.horizontal, h = resolution.vertical;
 
     drawTable = new Array(w);
     drawTableEl = new Array(w);
@@ -186,6 +338,7 @@ function initDrawTable() {
         button.onclick = (function(color) {
             return function(evt) {
                 currentColor = color;
+                currentColorString = getColorString(currentColor);
             };
         })(i);
         document.body.appendChild(button);
@@ -242,17 +395,24 @@ function resetDrawTable() {
         }
     }
 
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, resolution.width, resolution.height);
+
     var flags = document.getElementById("flag-result");
     flags.innerHTML = "";
 }
 
 function fillColor(color) {
     currentColor = color;
+    currentColorString = getColorString(currentColor);
     for (var x = 0; x < drawTable.length; x++) {
         for (var y = 0; y < drawTable[0].length; y++) {
             paint(x, y);
         }
     }
+
+    ctx.fillStyle = currentColorString;
+    ctx.fillRect(0, 0, resolution.width, resolution.height);
 
     searchFlag(drawTable);
 }
@@ -293,7 +453,7 @@ function searchFlag(inData) {
 
     var stop = Date.now();
 
-    console.log((stop - start) / 1000);
+    //console.log((stop - start) / 1000);
 }
 
 function analyzeFlags(inData) {

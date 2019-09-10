@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
     min-height: 100vh;
     margin: 0;
 }
@@ -10,7 +11,13 @@ body {
 }
 
 canvas {
-    width: 256px;
+    /*width: 256px;*/
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 20px;
+
+    border: 1px solid gray;
+
     image-rendering: -webkit-optimize-contrast;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-crisp-edges;
@@ -19,6 +26,8 @@ canvas {
 }
 
 table {
+    display: none;
+
     margin-bottom: 20px;
     border-collapse: collapse;
     width: 100%;
@@ -28,6 +37,7 @@ table {
 table td {
     border: 1px solid gray;
 }
+
 table td:after {
     content: '';
     display: block;
