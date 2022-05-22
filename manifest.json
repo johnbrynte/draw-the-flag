@@ -3,17 +3,17 @@
   "name": "Draw The Flag",
   "icons": [
     {
-      "src": "http://johnbrynte.se/flag/icons/icon-192.png",
+      "src": "https://www.johnbrynte.se/projects/flag/icons/icon-192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "http://johnbrynte.se/flag/icons/icon-512.png",
+      "src": "https://www.johnbrynte.se/projects/flag/icons/icon-512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
   ],
-  "start_url": "http://johnbrynte.se/flag/",
+  "start_url": "https://www.johnbrynte.se/projects/flag/",
   "background_color": "#ddd",
   "display": "standalone",
   "orientation": "portrait",
