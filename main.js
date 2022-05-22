@@ -12,6 +12,8 @@ document.ondrag = function(evt) {
     evt.preventDefault();
 }
 
+var baseURL = "http://johnbrynte.se/flag/";
+
 var flagData;
 var flagInfo;
 
@@ -175,6 +177,7 @@ function initDrawCanvas() {
     };
 
     canvas.ontouchstart = function(evt) {
+        evt.preventDefault();
         var e = evt.touches[0];
         prevPos = convertToCanvasPos(e.pageX, e.pageY);
     };
@@ -221,10 +224,20 @@ function convertCanvasToTable() {
     var size = resolution.width / resolution.horizontal;
     var t_color = new tinycolor();
 
+    var _colors = {};
+    colorList.forEach(function(c, i) {
+        _colors[i] = 0;
+    });
+
     for (var x = 0; x < resolution.horizontal; x++) {
         for (var y = 0; y < resolution.vertical; y++) {
             var r = 0, g = 0, b = 0, a = 0;
             var c = 0;
+
+            colorList.forEach(function(c, i) {
+                _colors[i] = 0;
+            });
+
             for (var yy = 0; yy < size; yy++) {
                 for (var xx = 0; xx < size; xx++) {
                     var i = 4 * ((y * size + yy) * resolution.width + x * size + xx);
@@ -257,14 +270,22 @@ function convertCanvasToTable() {
                         _color = colorList.indexOf(colorPaletteLookup[hue]);
                     }
 
-                    c += _color;
+                    //c += _color;
+                    _colors[_color]++;
                 }
             }
             r /= size * size;
             g /= size * size;
             b /= size * size;
 
-            c /= size * size;
+            c = 0;
+            maxColor = 0;
+            colorList.forEach(function(_c, i) {
+                if (_colors[i] > maxColor) {
+                    maxColor = _colors[i];
+                    c = i;
+                }
+            });
 
             var color = colorList[Math.round(c)];
 
@@ -334,18 +355,30 @@ function initDrawTable() {
 
     for (var i = 0; i < colorList.length; i++) {
         var button = document.createElement("button");
-        button.style.backgroundColor = getColorString(colorKey[colorList[i]]);
-        if (i == 0) {
-            button.style.color = "white";
-        }
+        button.style.borderColor = getColorString(colorKey[colorList[i]]);
+        button.className = "paint-button pen-button";
         button.setAttribute("type", "button");
-        button.innerHTML = colorList[i];
-        button.onclick = (function(color) {
+        var img = new Image();
+        img.src = baseURL + "icons/pen-icon.png";
+        button.appendChild(img);
+        var text = document.createTextNode(colorList[i]);
+        button.appendChild(text);
+        button.onclick = (function(color, el) {
             return function(evt) {
+                [].slice.call(document.getElementsByClassName("pen-button")).forEach(function(_el, i) {
+                    _el.style.backgroundColor = "";
+                    if (i == 0) {
+                        _el.style.color = "black";
+                    }
+                });
+                el.style.backgroundColor = getColorString(colorKey[colorList[color]]);
+                if (color == 0) {
+                    el.style.color = "white";
+                }
                 currentColor = color;
                 currentColorString = getColorString(currentColor);
             };
-        })(i);
+        })(i, button);
         document.body.appendChild(button);
     }
 
@@ -356,11 +389,16 @@ function initDrawTable() {
     for (var i = 0; i < colorList.length; i++) {
         var button = document.createElement("button");
         button.style.backgroundColor = getColorString(colorKey[colorList[i]]);
+        button.className = "paint-button";
         if (i == 0) {
             button.style.color = "white";
         }
         button.setAttribute("type", "button");
-        button.innerHTML = colorList[i];
+        var img = new Image();
+        img.src = baseURL + "icons/fill-icon.png";
+        button.appendChild(img);
+        var text = document.createTextNode(colorList[i]);
+        button.appendChild(text);
         button.onclick = (function(color) {
             return function(evt) {
                 fillColor(color);
@@ -467,7 +505,7 @@ function searchFlag(inData) {
         flagEl.appendChild(p);
 
         var img = new Image();
-        img.src = data.image;
+        img.src = baseURL + data.image;
         flagEl.appendChild(img);
 
         flags.appendChild(flagEl);

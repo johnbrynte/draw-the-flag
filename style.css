@@ -8,6 +8,7 @@ body {
     padding: 20px;
     max-width: 500px;
     margin: 0 auto;
+    background: #ddd;
 }
 
 canvas {
@@ -16,7 +17,7 @@ canvas {
     max-width: 500px;
     margin-bottom: 20px;
 
-    border: 1px solid gray;
+    border: 3px outset #ccc;
 
     image-rendering: -webkit-optimize-contrast;
     image-rendering: -moz-crisp-edges;
@@ -50,7 +51,19 @@ p {
 
 button {
     padding: 0.6em 1em;
-    background-color: white;
+}
+
+button.paint-button {
+    padding: 0;
+    padding-right: 0.6em;
+    margin: 0.15em 0.3em 0.15em 0;
+}
+
+button.paint-button img {
+    width: 32px;
+    height: 32px;
+    vertical-align: middle;
+    margin-right: 0.5em;
 }
 
 .button-controls {

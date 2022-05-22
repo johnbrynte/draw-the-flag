@@ -1,0 +1,2 @@
+# Disable Varnish cache
+Header add "disablevcache" "true"
