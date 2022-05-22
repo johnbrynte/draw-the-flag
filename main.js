@@ -98,6 +98,8 @@ var currentColorString = getColorString(currentColor);
 var canvas;
 var ctx;
 var brushSize = 10;
+var currentSize = 2;
+var currentTool = "pen";
 
 var resolution = {
     width: 160,
@@ -163,7 +165,7 @@ function initDrawCanvas() {
     };
 
     canvas.onmousemove = function(evt) {
-        if (mouseDown) {
+        if (mouseDown && currentTool === "pen") {
             var pos = convertToCanvasPos(evt.pageX, evt.pageY);
 
             drawLine(prevPos, pos);
@@ -174,6 +176,10 @@ function initDrawCanvas() {
 
     canvas.onmouseup = function(evt) {
         convertCanvasToTable();
+
+        if (currentTool === "fill") {
+            fillColor(currentColor);
+        }
     };
 
     canvas.ontouchstart = function(evt) {
@@ -189,16 +195,23 @@ function initDrawCanvas() {
 
     canvas.ontouchmove = function(evt) {
         evt.preventDefault();
-        var e = evt.touches[0];
-        var pos = convertToCanvasPos(e.pageX, e.pageY);
 
-        drawLine(prevPos, pos);
+        if (currentTool === "pen") {
+            var e = evt.touches[0];
+            var pos = convertToCanvasPos(e.pageX, e.pageY);
 
-        prevPos = pos;
+            drawLine(prevPos, pos);
+
+            prevPos = pos;
+        }
     };
 
     canvas.ontouchend = function() {
         convertCanvasToTable();
+
+        if (currentTool === "fill") {
+            fillColor(currentColor);
+        }
     }
 
     function drawLine(a, b) {
@@ -353,93 +366,148 @@ function initDrawTable() {
         searchFlag(drawTable);
     }
 
+    var row = createContainer({
+        parent: document.body,
+        className: "tools",
+    });
+
+    var col1 = createContainer({
+        parent: row,
+        className: "tools__color",
+    });
     for (var i = 0; i < colorList.length; i++) {
-        var button = document.createElement("button");
-        button.style.borderColor = getColorString(colorKey[colorList[i]]);
-        button.className = "paint-button pen-button";
-        button.setAttribute("type", "button");
-        var img = new Image();
-        img.src = baseURL + "icons/pen-icon.png";
-        button.appendChild(img);
-        var text = document.createTextNode(colorList[i]);
-        button.appendChild(text);
-        button.onclick = (function(color, el) {
-            return function(evt) {
-                [].slice.call(document.getElementsByClassName("pen-button")).forEach(function(_el, i) {
-                    _el.style.backgroundColor = "";
-                    if (i == 0) {
-                        _el.style.color = "black";
-                    }
-                });
-                el.style.backgroundColor = getColorString(colorKey[colorList[color]]);
-                if (color == 0) {
-                    el.style.color = "white";
-                }
-                currentColor = color;
-                currentColorString = getColorString(currentColor);
-            };
-        })(i, button);
-        document.body.appendChild(button);
+        createButton({
+            parent: col1,
+            className: "pen-button color-button " + (i === currentColor ? "button--active" : ""),
+            style: {
+                backgroundColor: getColorString(i),
+            },
+            onclick: (function(color) {
+                return function(evt, el) {
+                    [].slice.call(document.getElementsByClassName("color-button")).forEach(function(_el, i) {
+                        _el.classList.remove("button--active");
+                    });
+                    el.classList.add("button--active");
+
+                    currentColor = color;
+                    currentColorString = getColorString(currentColor);
+                };
+            })(i),
+        });
     }
 
-    var fillText = document.createElement("p");
-    fillText.innerHTML = "Fill:"
-    document.body.appendChild(fillText);
+    var col2 = createContainer({
+        parent: row,
+        className: "tools__tool",
+    });
 
-    for (var i = 0; i < colorList.length; i++) {
-        var button = document.createElement("button");
-        button.style.backgroundColor = getColorString(colorKey[colorList[i]]);
-        button.className = "paint-button";
-        if (i == 0) {
-            button.style.color = "white";
+    var penRow = createContainer({
+        parent: col2,
+        className: "tools__pen",
+    });
+    var onPenClick = function(type) {
+        return function(evt, el) {
+            [].slice.call(document.getElementsByClassName("tool-button")).forEach(function(_el, i) {
+                _el.classList.remove("button--active");
+            });
+            el.classList.add("button--active");
+
+            currentTool = type;
+            var sizesEl = [].slice.call(document.getElementsByClassName("size-button"));
+            sizesEl.forEach(function(_el, i) {
+                _el.classList.remove("button--active");
+            });
+            if (currentTool === "pen") {
+                sizesEl[currentSize - 1].classList.add("button--active");
+            }
         }
-        button.setAttribute("type", "button");
-        var img = new Image();
-        img.src = baseURL + "icons/fill-icon.png";
-        button.appendChild(img);
-        var text = document.createTextNode(colorList[i]);
-        button.appendChild(text);
-        button.onclick = (function(color) {
-            return function(evt) {
-                fillColor(color);
-            };
-        })(i);
-        document.body.appendChild(button);
-    }
-
-    var buttonControls = document.createElement("div");
-    buttonControls.className = "button-controls";
-
-    var reset = document.createElement("button");
-    reset.setAttribute("id", "reset");
-    reset.setAttribute("type", "button");
-    reset.innerHTML = "Reset";
-    reset.onclick = function() {
-        resetDrawTable();
     };
-    buttonControls.appendChild(reset);
-
-    var size1 = document.createElement("button");
-    size1.setAttribute("type", "button");
-    size1.innerHTML = "Small brush";
-    size1.onclick = function() {
-        brushSize = 10;
+    var onPenSizeClick = function(size) {
+        return function(evt, el) {
+            [].slice.call(document.getElementsByClassName("size-button")).forEach(function(_el, i) {
+                _el.classList.remove("button--active");
+            });
+            el.classList.add("button--active");
+            
+            brushSize = [5, 10, 22][size - 1];
+            currentSize = size;
+        }
     };
-    buttonControls.appendChild(size1);
+    createButton({
+        parent: penRow,
+        className: "tool-button button--active",
+        image: "icons/pen-icon.png",
+        onclick: onPenClick("pen"),
+    });
+    var penSizesRow = createContainer({
+        parent: penRow,
+        className: "tools__pen__sizes",
+    });
+    createButton({
+        parent: penSizesRow,
+        className: "size-button pen-button pen-size--1",
+        onclick: onPenSizeClick(1),
+    });
+    createButton({
+        parent: penSizesRow,
+        className: "size-button pen-button pen-size--2 button--active",
+        onclick: onPenSizeClick(2),
+    });
+    createButton({
+        parent: penSizesRow,
+        className: "size-button pen-button pen-size--3",
+        onclick: onPenSizeClick(3),
+    });
 
-    var size2 = document.createElement("button");
-    size2.setAttribute("type", "button");
-    size2.innerHTML = "Big brush";
-    size2.onclick = function() {
-        brushSize = 22;
-    };
-    buttonControls.appendChild(size2);
-
-    document.body.appendChild(buttonControls);
+    var paintRow = createContainer({
+        parent: col2
+    });
+    createButton({
+        parent: paintRow,
+        className: "tool-button",
+        image: "icons/fill-icon.png",
+        onclick: onPenClick("fill"),
+    });
 
     var flags = document.createElement("div");
     flags.setAttribute("id", "flag-result");
     document.body.appendChild(flags);
+}
+
+function createContainer(opts) {
+    return createElement("div", opts);
+}
+
+function createButton(opts) {
+    var button = createElement("button", opts);
+    button.setAttribute("type", "button");
+    return button;
+}
+
+function createElement(type, opts) {
+    var el = document.createElement(type);
+    if (opts.className) {
+        el.className = opts.className;
+    }
+    if (opts.style) {
+        for (var key in opts.style) {
+            el.style[key] = opts.style[key];
+        }
+    }
+    if (opts.image) {
+        var img = new Image();
+        img.src = baseURL + opts.image;
+        el.appendChild(img);
+    }
+    if (opts.onclick) {
+        el.onclick = function (evt) {
+            opts.onclick(evt, el);
+        };
+    }
+    if (opts.parent) {
+        opts.parent.appendChild(el);
+    }
+    return el;
 }
 
 function resetDrawTable() {

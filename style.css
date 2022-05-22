@@ -53,17 +53,17 @@ button {
     padding: 0.6em 1em;
 }
 
-button.paint-button {
+button.tool-button {
     padding: 0;
-    padding-right: 0.6em;
     margin: 0.15em 0.3em 0.15em 0;
+    border: 3px outset #ccc;
 }
 
-button.paint-button img {
-    width: 32px;
-    height: 32px;
+button.tool-button img {
+    width: 48px;
+    height: 48px;
     vertical-align: middle;
-    margin-right: 0.5em;
+    image-rendering: pixelated;
 }
 
 .button-controls {
@@ -77,4 +77,115 @@ button.paint-button img {
 .flag-result__item:first-child {
     background: rgba(0, 0, 255, 0.08);
     border: 1px solid #aaa;
+}
+
+.pen-button {
+    border: none;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 50%;
+    background-color: black;
+}
+
+.pen-size--1 {
+    width: 20px;
+    height: 20px;
+}
+
+.pen-size--2 {
+    width: 32px;
+    height: 32px;
+}
+
+.pen-size--3 {
+    width: 44px;
+    height: 44px;
+}
+
+.button--active {
+    box-shadow: 0 0 0 2px #ddd, 0 0 0 6px #6C63FF;
+}
+
+.tools {
+    display: grid;
+    grid-template-columns: 2fr 3fr;
+}
+
+.tools__color {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    justify-content: space-around;
+    justify-items: center;
+    align-items: center;
+    padding-right: 16px;
+    border-right: 1px solid #aaa;
+}
+
+.tools__tool {
+    padding-left: 16px;
+}
+
+.tools__pen {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.tools__pen__sizes {
+    position: relative;
+    width: 100%;
+    display: flex;
+    gap: 40px;
+    grid-template-columns: 1fr 1fr 1fr;
+    justify-content: center;
+    align-items: center;
+}
+
+.tools__pen__sizes:before {
+    position: absolute;
+    top: 50%;
+    left: calc(100%/6);
+    right: calc(100%/6);
+    content: " ";
+    height: 1px;
+    background-color: #aaa;
+    z-index: -1;
+}
+
+@media screen and (max-width: 500px) {
+    button.tool-button img {
+        width: 32px;
+        height: 32px;
+    }
+
+    .pen-button {
+        width: 20px;
+        height: 20px;
+    }
+
+    .tools__pen__sizes {
+        gap: 16px;
+    }
+
+    .pen-size--1 {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .pen-size--2 {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .pen-size--3 {
+        width: 32px;
+        height: 32px;
+    }
+
+    .tools__pen__sizes:before {
+        left: calc((100% - 80px)/2);
+        right: calc((100% - 80px)/2);
+    }
 }
