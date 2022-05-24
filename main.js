@@ -424,6 +424,15 @@ function initDrawTable() {
     };
     var onPenSizeClick = function(size) {
         return function(evt, el) {
+            if (currentTool !== "pen") {
+                var toolEls = [].slice.call(document.getElementsByClassName("tool-button"));
+                toolEls.forEach(function(_el, i) {
+                    _el.classList.remove("button--active");
+                });
+                toolEls[0].classList.add("button--active");
+                currentTool = "pen";
+            }
+
             [].slice.call(document.getElementsByClassName("size-button")).forEach(function(_el, i) {
                 _el.classList.remove("button--active");
             });
