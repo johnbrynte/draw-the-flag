@@ -189,3 +189,11 @@ button.tool-button img {
         right: calc((100% - 80px)/2);
     }
 }
+
+.canvas--cursor-pen {
+    cursor: url(icons/pen-cursor.png) 0 52, auto;
+}
+
+.canvas--cursor-fill {
+    cursor: url(icons/fill-cursor.png) 0 0, auto;
+}

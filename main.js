@@ -145,6 +145,7 @@ function getColorString(key) {
 
 function initDrawCanvas() {
     canvas = document.getElementById("canvas");
+    canvas.className = "canvas--cursor-" + currentTool;
     canvas.width = resolution.width;
     canvas.height = resolution.height;
     ctx = canvas.getContext("2d");
@@ -156,6 +157,8 @@ function initDrawCanvas() {
 
     canvas.onmousedown = function(evt) {
         prevPos = convertToCanvasPos(evt.pageX, evt.pageY);
+
+        currentTool === "pen" && drawLine(prevPos, prevPos);
     };
 
     canvas.onmouseenter = function(evt) {
@@ -186,6 +189,8 @@ function initDrawCanvas() {
         evt.preventDefault();
         var e = evt.touches[0];
         prevPos = convertToCanvasPos(e.pageX, e.pageY);
+
+        currentTool === "pen" && drawLine(prevPos, prevPos);
     };
 
     canvas.ontouchenter = function() {
@@ -413,6 +418,8 @@ function initDrawTable() {
             el.classList.add("button--active");
 
             currentTool = type;
+            canvas.className = "canvas--cursor-" + currentTool;
+
             var sizesEl = [].slice.call(document.getElementsByClassName("size-button"));
             sizesEl.forEach(function(_el, i) {
                 _el.classList.remove("button--active");
@@ -431,6 +438,7 @@ function initDrawTable() {
                 });
                 toolEls[0].classList.add("button--active");
                 currentTool = "pen";
+                canvas.className = "canvas--cursor-" + currentTool;
             }
 
             [].slice.call(document.getElementsByClassName("size-button")).forEach(function(_el, i) {
