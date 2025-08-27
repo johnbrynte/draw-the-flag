@@ -12,7 +12,7 @@ document.ondrag = function(evt) {
     evt.preventDefault();
 }
 
-var baseURL = "http://johnbrynte.se/flag/";
+var baseURL = "https://johnbrynte.github.io/draw-the-flag/";
 
 var flagData;
 var flagInfo;
